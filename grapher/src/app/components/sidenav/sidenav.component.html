@@ -1,0 +1,19 @@
+<mat-sidenav-container class="grapher-sidenav">
+  <mat-sidenav #sideNav>
+    <mat-nav-list *ngFor="let view of views"><a mat-list-item>{{ view.name }}</a></mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="grapher-sidenav-content">
+    <grapher-view *ngFor="let view of views">
+      <grapher-diagram></grapher-diagram>
+    </grapher-view>
+    <eco-fab-speed-dial class="eco-bottom-right" direction="left">
+        <eco-fab-speed-dial-trigger>
+            <button mat-fab><mat-icon>settings</mat-icon></button>
+        </eco-fab-speed-dial-trigger>
+        <eco-fab-speed-dial-actions>
+            <button mat-mini-fab><mat-icon>code</mat-icon></button>
+        </eco-fab-speed-dial-actions>
+    </eco-fab-speed-dial>
+  </mat-sidenav-content>
+</mat-sidenav-container>

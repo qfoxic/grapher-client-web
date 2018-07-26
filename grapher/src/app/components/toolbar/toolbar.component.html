@@ -1,0 +1,13 @@
+<mat-toolbar color="primary" class="grapher-toolbar">
+  <mat-toolbar-row class="grapher-flex-shrink-5">
+      <button (click)="onMenuClick()" mat-icon-button><mat-icon>menu</mat-icon></button>
+      <h1></h1>
+  </mat-toolbar-row>
+  <mat-toolbar-row class="grapher-flex-shrink-1">
+    <mat-form-field>
+      <input #inputCommand matInput>
+    </mat-form-field>
+    <button (click)="onRunCommandClick(inputCommand.value)" mat-raised-button><mat-icon>play_arrow</mat-icon></button>
+  </mat-toolbar-row>
+</mat-toolbar>
+
