@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { GrapherSettingsService, ViewSettings } from './services/settings.service';
+import { Component, Input } from '@angular/core';
+import { GrapherSettingsService, DiagramSettings } from './services/settings.service';
 
 
 @Component({
@@ -7,12 +7,7 @@ import { GrapherSettingsService, ViewSettings } from './services/settings.servic
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements OnInit {
-  views: Array<ViewSettings>;
-
-  constructor(settings: GrapherSettingsService) {
-    this.views = settings.getViews();
-  }
-
-  ngOnInit() {}
+export class AppComponent {
+  @Input() private currentDiagram: DiagramSettings;
+  @Input() private settingsService: GrapherSettingsService;
 }

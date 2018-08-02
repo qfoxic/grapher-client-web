@@ -9,20 +9,19 @@ import * as go from 'gojs';
 export class DiagramComponent implements AfterContentInit {
   private diagram: go.Diagram;
 
-  @ViewChild('diagramDiv') diagramRef;
+  @ViewChild('diagramDiv') private diagramRef;
 
-  @Input()
-  get model(): go.Model { return this.diagram.model; }
+  @Input() get model(): go.Model { return this.diagram.model; }
   set model(val: go.Model) { this.diagram.model = val; }
 
   constructor() {
     this.diagram = new go.Diagram();
     this.diagram.model = new go.GraphLinksModel(
     [
-      { key: 1, text: "Alpha", color: "lightblue" },
-      { key: 2, text: "Beta", color: "orange" },
-      { key: 3, text: "Gamma", color: "lightgreen" },
-      { key: 4, text: "Delta", color: "pink" }
+      { key: 1, text: 'Alpha', color: 'lightblue' },
+      { key: 2, text: 'Beta', color: 'orange' },
+      { key: 3, text: 'Gamma', color: 'lightgreen' },
+      { key: 4, text: 'Delta', color: 'pink' }
     ],
     [
       { from: 1, to: 2 },

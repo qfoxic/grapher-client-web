@@ -1,4 +1,22 @@
 <div class="grapher-container">
-  <grapher-toolbar (menuClicked)="snav.toggleSideNav()"></grapher-toolbar>
-  <grapher-sidenav #snav [views]="views"></grapher-sidenav>
+  <grapher-toolbar [currentDiagram]="currentDiagram" (menuClicked)="snav.toggle()"></grapher-toolbar>
+  <mat-sidenav-container class="grapher-dashboard">
+    <mat-sidenav #snav>
+      <mat-nav-list *ngFor="let diagram of settingsService.diagrams; let i = index;">
+        <mat-list-item><a uiSref="app.diagram" [uiParams]="{ diagramId: i }">{{ diagram.name }}</a></mat-list-item>
+      </mat-nav-list>
+    </mat-sidenav>
+
+    <mat-sidenav-content class="grapher-dashboard-content">
+      <ui-view name="content" class="grapher-diagram-content"></ui-view>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+  <eco-fab-speed-dial class="eco-bottom-right" direction="left">
+    <eco-fab-speed-dial-trigger>
+      <button mat-fab><mat-icon>settings</mat-icon></button>
+    </eco-fab-speed-dial-trigger>
+    <eco-fab-speed-dial-actions>
+      <button mat-mini-fab><mat-icon>code</mat-icon></button>
+    </eco-fab-speed-dial-actions>
+  </eco-fab-speed-dial>
 </div>

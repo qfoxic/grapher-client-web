@@ -6,29 +6,48 @@ import { LayoutModule } from '@angular/cdk/layout';
 import { MatToolbarModule,
          MatButtonModule, MatSidenavModule, MatIconModule, MatListModule, MatCardModule,
          MatInputModule, MatSelectModule } from '@angular/material';
-import { UIRouterModule } from '@uirouter/angular';
+import { UIRouterModule, UIView, Transition } from '@uirouter/angular';
 
 import { EcoFabSpeedDialActionsComponent,
          EcoFabSpeedDialComponent,
          EcoFabSpeedDialTriggerComponent } from './components/speed-dial/speed-dial.component';
 import { DiagramComponent } from './components/diagram/diagram.component';
 import { ToolbarComponent } from './components/toolbar/toolbar.component';
-import { SidenavComponent } from './components/sidenav/sidenav.component';
-import { ViewComponent } from './components/view/view.component';
+import { GrapherSettingsService } from './services/settings.service';
+
+/*
+* TODOs.
+* implement config edit.
+* Implement actually backend communication.
+* */
 
 
 const STATES = [
-    {
-        name: 'app',
-        url: '/',
-        component: AppComponent
+  {
+    // TODO. Redirect to a first view.
+    name: 'app',
+    component: AppComponent,
+    abstract: true,
+    resolve: [{
+      token: 'settingsService',
+      deps: [GrapherSettingsService],
+      resolveFn: (s) => s
+    }, {
+      token: 'currentDiagram',
+      deps: [GrapherSettingsService, Transition],
+      resolveFn: (s, t) => s.diagrams[t.params().diagramId],
+    }]
+  },
+  {
+    name: 'app.diagram',
+    url: '/diagram/:diagramId',
+    views: {
+      'content': { component: DiagramComponent }
     },
-    {
-        // TODO. Add viewid
-        name: 'app.view',
-        url: 'view',
-        component: ViewComponent
+    onEnter: (t) => {
+      t.injector().get('settingsService').changeCurrentDiagram(t.params().diagramId);
     }
+  }
 ];
 
 
@@ -39,15 +58,13 @@ const STATES = [
         EcoFabSpeedDialComponent,
         EcoFabSpeedDialTriggerComponent,
         DiagramComponent,
-        ToolbarComponent,
-        SidenavComponent,
-        ViewComponent
+        ToolbarComponent
     ],
     imports: [
         BrowserModule,
         BrowserAnimationsModule,
         UIRouterModule.forRoot({
-            states: STATES
+            states: STATES,
         }),
         LayoutModule,
         MatToolbarModule,
@@ -60,6 +77,6 @@ const STATES = [
         MatSelectModule
     ],
     providers: [],
-    bootstrap: [AppComponent]
+    bootstrap: [UIView]
 })
 export class AppModule { }

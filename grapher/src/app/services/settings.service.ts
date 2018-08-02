@@ -1,19 +1,20 @@
 import { Injectable } from '@angular/core';
+import { Subject } from 'rxjs';
 
 
 const STORAGE_TYPE = 'localStorage';
 const PREFIX = 'grapher';
-const VIEWS_KEY = 'views';
+const DIAGRAMS_KEY = 'diagrams';
 
 
-export class ViewSettings {
+export class DiagramSettings {
   // Title will be displayed in a toolbar.
   title: string;
 
   // Used as an id field;
   name: string;
 
-  static isComplete(obj: any): obj is ViewSettings {
+  static isComplete(obj: any): obj is DiagramSettings {
     return obj.title !== undefined && obj.name !== undefined;
   }
 
@@ -24,36 +25,31 @@ export class ViewSettings {
 }
 
 
-@Injectable({
-  providedIn: 'root'
-})
-export class GrapherSettingsService {
-
+class GrapherStorage {
   private storage: Storage;
   private prefix: string;
-  private views: Array<ViewSettings>;
 
   constructor() {
     this.storage = window[STORAGE_TYPE];
     this.prefix = PREFIX;
-    this.views = [];
   }
 
-  public getViews(): Array<ViewSettings> {
+  public getDiagrams(): Array<DiagramSettings> {
+    const result = [];
     try {
-      const items = JSON.parse(this.storage.getItem(this.formatKey(VIEWS_KEY)));
+      const items = JSON.parse(this.storage.getItem(this.formatKey(DIAGRAMS_KEY)));
       for (const item of items) {
-        if (ViewSettings.isComplete(item)) {
-          this.views.push(new ViewSettings(item));
+        if (DiagramSettings.isComplete(item)) {
+          result.push(new DiagramSettings(item));
         }
       }
-      return this.views;
+      return result;
     } catch (e) {
-      return [];
+      return result;
     }
   }
 
-  public set(key: string, value: any): boolean {
+  private set(key: string, value: any): boolean {
     if (!value) {
       return false;
     }
@@ -68,8 +64,31 @@ export class GrapherSettingsService {
     return true;
   }
 
-  public formatKey(key: string): string {
+  private formatKey(key: string): string {
     return `${this.prefix}${key}`;
   }
+}
 
+
+@Injectable({
+  providedIn: 'root'
+})
+export class GrapherSettingsService {
+
+  private storage: GrapherStorage;
+
+  private currentDiagram = new Subject<DiagramSettings>();
+  diagramChanged$ = this.currentDiagram.asObservable();
+
+  constructor() {
+    this.storage = new GrapherStorage();
+  }
+
+  public changeCurrentDiagram(diagramId: string) {
+    this.currentDiagram.next(this.diagrams[diagramId]);
+  }
+
+  public get diagrams(): Array<DiagramSettings> {
+    return this.storage.getDiagrams();
+  }
 }
