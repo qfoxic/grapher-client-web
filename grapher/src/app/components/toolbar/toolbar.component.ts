@@ -10,11 +10,11 @@ import { DiagramSettings, GrapherSettingsService } from '../../services/settings
   styleUrls: ['./toolbar.component.scss']
 })
 export class ToolbarComponent implements OnDestroy {
-  private subscription: Subscription;
+  private readonly subscription: Subscription;
 
   @Input() private currentDiagram: DiagramSettings;
 
-  @Output() menuClicked = new EventEmitter<any>();
+  @Output() menuClicked = new EventEmitter<void>();
   @Output() runCommandClicked = new EventEmitter<string>();
 
   constructor(private settingsService: GrapherSettingsService) {
@@ -24,11 +24,11 @@ export class ToolbarComponent implements OnDestroy {
   }
 
   onMenuClick() {
-      this.menuClicked.emit();
+    this.menuClicked.emit(null);
   }
 
   onRunCommandClick(cmd: string) {
-      this.runCommandClicked.emit(cmd);
+    this.runCommandClicked.emit(cmd);
   }
 
   ngOnDestroy() {

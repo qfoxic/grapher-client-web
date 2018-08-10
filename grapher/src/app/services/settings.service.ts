@@ -9,25 +9,36 @@ const DIAGRAMS_KEY = 'diagrams';
 
 export class DiagramSettings {
   // Title will be displayed in a toolbar.
-  title: string;
+  readonly title: string;
 
   // Used as an id field;
-  name: string;
+  readonly name: string;
+
+  // Websocket Connection url
+  readonly url: string;
+
+  // Driver type, like aws.
+  readonly driver: string;
 
   static isComplete(obj: any): obj is DiagramSettings {
-    return obj.title !== undefined && obj.name !== undefined;
+    return (
+      obj.title !== undefined && obj.name !== undefined &&
+      obj.url !== undefined && obj.driver !== undefined
+    );
   }
 
-  constructor(data: Object) {
-    this.title = data['title'];
-    this.name = data['name'];
+  constructor({title, name, url, driver}) {
+    this.title = title;
+    this.name = name;
+    this.url = url;
+    this.driver = driver;
   }
 }
 
 
 class GrapherStorage {
-  private storage: Storage;
-  private prefix: string;
+  private readonly prefix: string;
+  private readonly storage: Storage;
 
   constructor() {
     this.storage = window[STORAGE_TYPE];

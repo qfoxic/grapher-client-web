@@ -5,7 +5,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LayoutModule } from '@angular/cdk/layout';
 import { MatToolbarModule,
          MatButtonModule, MatSidenavModule, MatIconModule, MatListModule, MatCardModule,
-         MatInputModule, MatSelectModule } from '@angular/material';
+         MatInputModule, MatSelectModule, MatSnackBarModule } from '@angular/material';
 import { UIRouterModule, UIView, Transition } from '@uirouter/angular';
 
 import { EcoFabSpeedDialActionsComponent,
@@ -14,10 +14,12 @@ import { EcoFabSpeedDialActionsComponent,
 import { DiagramComponent } from './components/diagram/diagram.component';
 import { ToolbarComponent } from './components/toolbar/toolbar.component';
 import { GrapherSettingsService } from './services/settings.service';
+import { GrapherBackendService } from './services/backend.service';
 
 /*
 * TODOs.
 * implement config edit.
+* implement a status line under toolbar that will display connection status.
 * Implement actually backend communication.
 * */
 
@@ -32,6 +34,10 @@ const STATES = [
       token: 'settingsService',
       deps: [GrapherSettingsService],
       resolveFn: (s) => s
+    }, {
+      token: 'backendService',
+      deps: [GrapherBackendService],
+      resolveFn: (b) => b
     }, {
       token: 'currentDiagram',
       deps: [GrapherSettingsService, Transition],
@@ -74,7 +80,8 @@ const STATES = [
         MatListModule,
         MatCardModule,
         MatInputModule,
-        MatSelectModule
+        MatSelectModule,
+        MatSnackBarModule
     ],
     providers: [],
     bootstrap: [UIView]

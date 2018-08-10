@@ -1,9 +1,13 @@
 <div class="grapher-container">
-  <grapher-toolbar [currentDiagram]="currentDiagram" (menuClicked)="snav.toggle()"></grapher-toolbar>
+  <grapher-toolbar
+    [currentDiagram]="currentDiagram" (menuClicked)="snav.toggle()" (runCommandClicked)="execCmd($event)">
+  </grapher-toolbar>
   <mat-sidenav-container class="grapher-dashboard">
     <mat-sidenav #snav>
       <mat-nav-list *ngFor="let diagram of settingsService.diagrams; let i = index;">
-        <mat-list-item><a uiSref="app.diagram" [uiParams]="{ diagramId: i }">{{ diagram.name }}</a></mat-list-item>
+        <mat-list-item>
+          <a uiSref="app.diagram" [uiParams]="{ diagramId: i }">{{ diagram.name }}</a>
+        </mat-list-item>
       </mat-nav-list>
     </mat-sidenav>
 
