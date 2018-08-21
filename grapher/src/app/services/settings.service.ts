@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Subject } from 'rxjs';
+import { Subject, Observable } from 'rxjs';
 
 
 const STORAGE_TYPE = 'localStorage';
@@ -7,7 +7,54 @@ const PREFIX = 'grapher';
 const DIAGRAMS_KEY = 'diagrams';
 
 
-export class DiagramSettings {
+export class GShape {
+  readonly figure: string;
+  readonly fill: string;
+  readonly geometryString: string;
+
+  constructor({figure, fill, geometryString}) {
+    this.figure = figure;
+    this.fill = fill;
+    this.geometryString = geometryString;
+  }
+
+  static isValid(obj: any): obj is GShape {
+    return (
+      obj.fill !== undefined && (obj.figure !== undefined || obj.geometryString !== undefined)
+    );
+  }
+}
+
+
+export enum GLayoutTypes {
+  CIRCULAR = 'circular',
+  FORCE = 'force',
+  GRID = 'grid',
+  DIGRAPH = 'digraph',
+  TREE  = 'tree'
+}
+
+type GLayoutKeys = GLayoutTypes.CIRCULAR | GLayoutTypes.FORCE | GLayoutTypes.GRID | GLayoutTypes.DIGRAPH | GLayoutTypes.TREE;
+
+
+export class GLayout {
+  readonly icon: string;
+  readonly tip: string;
+
+  constructor({tip, icon}) {
+    this.tip = tip;
+    this.icon = icon;
+  }
+
+  static isValid(obj: any): obj is GLayout {
+    return (
+      obj.tip !== undefined && obj.icon !== undefined
+    );
+  }
+}
+
+
+export class GDiagram {
   // Title will be displayed in a toolbar.
   readonly title: string;
 
@@ -20,59 +67,71 @@ export class DiagramSettings {
   // Driver type, like aws.
   readonly driver: string;
 
-  static isComplete(obj: any): obj is DiagramSettings {
+  readonly shapes: Map<string, GShape>;
+
+  readonly layouts: Map<GLayoutKeys, GLayout>;
+
+  readonly layoutTypes: Array<string>;
+
+  static isValid(obj: any): obj is GDiagram {
     return (
       obj.title !== undefined && obj.name !== undefined &&
       obj.url !== undefined && obj.driver !== undefined
     );
   }
 
-  constructor({title, name, url, driver}) {
+  constructor({title, name, url, driver, shapes, layouts}) {
     this.title = title;
     this.name = name;
     this.url = url;
     this.driver = driver;
+    this.shapes = new Map<string, GShape>();
+    this.layouts = new Map<GLayoutKeys, GLayout>();
+    this.layoutTypes = new Array<string>();
+
+    for (const shape in shapes) {
+      if (GShape.isValid(shapes[shape])) {
+        this.shapes.set(shape, new GShape(shapes[shape]));
+      }
+    }
+    for (const layout in layouts) {
+      if (GLayout.isValid(layouts[layout])) {
+        this.layouts.set(<GLayoutKeys>layout, new GLayout(layouts[layout]));
+      }
+    }
+    this.layouts.forEach((v, k) => { this.layoutTypes.push(k); }, this);
+  }
+
+  public get defaultLayout(): string {
+    return this.layoutTypes[0];
   }
 }
 
 
-class GrapherStorage {
+class GStorage {
   private readonly prefix: string;
   private readonly storage: Storage;
+  private _diagrams: Array<GDiagram>;
 
   constructor() {
     this.storage = window[STORAGE_TYPE];
     this.prefix = PREFIX;
+    this._diagrams = new Array<GDiagram>();
+
+    this.loadDiagrams();
   }
 
-  public getDiagrams(): Array<DiagramSettings> {
-    const result = [];
-    try {
-      const items = JSON.parse(this.storage.getItem(this.formatKey(DIAGRAMS_KEY)));
-      for (const item of items) {
-        if (DiagramSettings.isComplete(item)) {
-          result.push(new DiagramSettings(item));
-        }
+  public get diagrams(): Array<GDiagram> {
+    return this._diagrams;
+  }
+
+  private loadDiagrams(): void {
+    const items = JSON.parse(this.storage.getItem(this.formatKey(DIAGRAMS_KEY)));
+    for (const item of items) {
+      if (GDiagram.isValid(item)) {
+        this._diagrams.push(new GDiagram(item));
       }
-      return result;
-    } catch (e) {
-      return result;
     }
-  }
-
-  private set(key: string, value: any): boolean {
-    if (!value) {
-      return false;
-    }
-
-    value = JSON.stringify(value);
-
-    try {
-      this.storage.setItem(this.formatKey(key), value);
-    } catch (e) {
-      return false;
-    }
-    return true;
   }
 
   private formatKey(key: string): string {
@@ -81,25 +140,87 @@ class GrapherStorage {
 }
 
 
+
+export enum DiagramMessageType {
+  LAYOUT = 'layout',
+  INITIAL_LAYOUT = 'initial_layout',
+  CLEAR = 'clear',
+
+}
+
+
+export class DiagramMessage {
+  constructor(public changeType: DiagramMessageType,
+              public data?: string) {}
+}
+
+
 @Injectable({
   providedIn: 'root'
 })
-export class GrapherSettingsService {
+export class GSettingsService {
 
-  private storage: GrapherStorage;
-
-  private currentDiagram = new Subject<DiagramSettings>();
-  diagramChanged$ = this.currentDiagram.asObservable();
+  private storage: GStorage;
+  private curDiagramId: number;
+  private diagramSubject: Subject<DiagramMessage>;
+  public updateDiagram$: Observable<DiagramMessage>;
 
   constructor() {
-    this.storage = new GrapherStorage();
+    this.storage = new GStorage();
+    this.diagramSubject = new Subject<DiagramMessage>();
+    this.updateDiagram$ = this.diagramSubject.asObservable();
   }
 
-  public changeCurrentDiagram(diagramId: string) {
-    this.currentDiagram.next(this.diagrams[diagramId]);
+  public changeCurrentDiagram(diagramId: number): void {
+    this.curDiagramId = diagramId;
   }
 
-  public get diagrams(): Array<DiagramSettings> {
-    return this.storage.getDiagrams();
+  public changeCurrentDiagramLayout(layout: string): void {
+    this.diagramSubject.next(new DiagramMessage(
+      DiagramMessageType.LAYOUT,
+      layout
+    ));
+  }
+
+  public clearDiagram(): void {
+    this.diagramSubject.next(new DiagramMessage(
+      DiagramMessageType.CLEAR
+    ));
+  }
+
+  public makeInitialLayout(): void {
+    this.diagramSubject.next(new DiagramMessage(
+      DiagramMessageType.INITIAL_LAYOUT
+    ));
+  }
+
+  public get diagrams(): Array<GDiagram> {
+    return this.storage.diagrams;
+  }
+
+  public get currentDiagram(): GDiagram {
+    return this.storage.diagrams[this.curDiagramId];
+  }
+
+  public get currentDiagramId(): number {
+    return this.curDiagramId;
+  }
+
+  public close(): void {
+    this.diagramSubject.unsubscribe();
   }
 }
+
+
+const test_config = [
+ {"title":"view1", "name": "test_view1", "url": "ws://127.0.0.1:9999", "driver": "aws",
+ "shapes": {
+        "ec2": {"fill": "red", "figure": "Diamond"},
+        "sg": {"fill": "green", "figure": "Ellipse"}
+ },
+   "layouts": {
+        "circular": {"tip": "Display data in a circle", "icon": "C"},
+        "force": {"tip": "Display in a tree with forces", "icon": "F"}
+  }
+ },
+  {"title":"view2", "name": "test_view2", "url": "ws://127.0.0.1:9999", "driver": "aws"}]

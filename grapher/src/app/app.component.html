@@ -1,26 +1,41 @@
 <div class="grapher-container">
-  <grapher-toolbar
-    [currentDiagram]="currentDiagram" (menuClicked)="snav.toggle()" (runCommandClicked)="execCmd($event)">
-  </grapher-toolbar>
-  <mat-sidenav-container class="grapher-dashboard">
-    <mat-sidenav #snav>
-      <mat-nav-list *ngFor="let diagram of settingsService.diagrams; let i = index;">
-        <mat-list-item>
-          <a uiSref="app.diagram" [uiParams]="{ diagramId: i }">{{ diagram.name }}</a>
-        </mat-list-item>
-      </mat-nav-list>
-    </mat-sidenav>
+  <mat-progress-bar [mode]="progressMode"></mat-progress-bar>
+  <ui-view name="content"></ui-view>
 
-    <mat-sidenav-content class="grapher-dashboard-content">
-      <ui-view name="content" class="grapher-diagram-content"></ui-view>
-    </mat-sidenav-content>
-  </mat-sidenav-container>
-  <eco-fab-speed-dial class="eco-bottom-right" direction="left">
-    <eco-fab-speed-dial-trigger>
-      <button mat-fab><mat-icon>settings</mat-icon></button>
-    </eco-fab-speed-dial-trigger>
-    <eco-fab-speed-dial-actions>
-      <button mat-mini-fab><mat-icon>code</mat-icon></button>
-    </eco-fab-speed-dial-actions>
-  </eco-fab-speed-dial>
+  <div class="top-button-panel">
+    <mat-form-field appearance="outline">
+      <mat-select placeholder="Select View" [(value)]="settingsService.currentDiagramId">
+        <mat-option *ngFor="let diagram of settingsService.diagrams; let i = index;"
+                    [value]="i" uiSref="app.diagram" [uiParams]="{ diagramId: i }">
+          {{ diagram.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="input-item">
+      <input #inputCommand matInput>
+      <mat-icon (click)="execCmd(inputCommand.value)" matSuffix>play_arrow</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <mat-button-toggle-group class="system-buttons" [vertical]="true">
+    <label class="group-label">system</label>
+    <mat-button-toggle matTooltip="Make diagram completely fresh"
+                       (click)="settingsService.clearDiagram()">
+      <mat-icon>blur_off</mat-icon>
+    </mat-button-toggle>
+    <mat-button-toggle matTooltip="Restructure items with initial grid layout"
+                       (click)="settingsService.makeInitialLayout()">
+      <mat-icon>grain</mat-icon>
+    </mat-button-toggle>
+  </mat-button-toggle-group>
+
+  <mat-button-toggle-group class="layout-buttons" [vertical]="true" value="{{ settingsService.currentDiagram.defaultLayout }}">
+    <label class="group-label" *ngIf="settingsService.currentDiagram.layouts.size > 0">layout</label>
+    <mat-button-toggle *ngFor="let layout of settingsService.currentDiagram.layoutTypes;"
+                       matTooltip="{{settingsService.currentDiagram.layouts.get(layout).tip}}"
+                       value="{{ layout }}"
+                       (click)="settingsService.changeCurrentDiagramLayout(layout)">
+      <mat-icon class="centered-text">{{ settingsService.currentDiagram.layouts.get(layout).icon }}</mat-icon>
+    </mat-button-toggle>
+  </mat-button-toggle-group>
 </div>
