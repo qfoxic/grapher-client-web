@@ -103,6 +103,26 @@ export class DiagramComponent implements AfterContentInit, OnDestroy, OnInit {
     this.diag.commitTransaction('clear_model');
   }
 
+  public onFilterManyLinks(): void {
+    this.diag.nodes.each(function(n) {
+      const c = n.linksConnected.count;
+      n.visible = (c === 0);
+    });
+  }
+
+  public onFilter0Links(): void {
+    this.diag.nodes.each(function(n) {
+      const c = n.linksConnected.count;
+      n.visible = (c >= 1);
+    });
+  }
+
+  public onFilterClear(): void {
+    this.diag.nodes.each(function(n) {
+        n.visible = true;
+    });
+  }
+
   public onMakeInitialLayout(): void {
     this.diag.startTransaction('make_initial_layout');
     try {
@@ -129,6 +149,12 @@ export class DiagramComponent implements AfterContentInit, OnDestroy, OnInit {
           this.onDiagramClear(); break;
         case DiagramMessageType.INITIAL_LAYOUT:
           this.onMakeInitialLayout(); break;
+        case DiagramMessageType.FILTER_MANY_LINKS:
+          this.onFilterManyLinks(); break;
+        case DiagramMessageType.FILTER_0_LINKS:
+          this.onFilter0Links(); break;
+        case DiagramMessageType.FILTER_CLEAR:
+          this.onFilterClear(); break;
         }
       });
 

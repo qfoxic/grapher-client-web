@@ -13,16 +13,19 @@ import { GBackendService } from './services/backend.service';
 
 /*
 * TODOs.
-* View Actions:
-*   // BUG. If shape wasn't described default color shouldn't be black.
-*   // BUG. Add decorators for transactions
+* - for each node display id or name.
+* - add filtering to backend to extract only necessary data.
+* - node shape should contains text and icon. Text should be displayed on the top of icon.
+*       inexistent icons should display just gray rounded square.
 *
-* Backend:
-*     Add different type of joins, left, right, inner, full. Investigate how to add dictionaries to sets.
+* View Actions:
+*   // BUG. Add decorators for transactions
 *
 * UI:
 *   add tooltips for every node.
-*   add clickable node that will open it in AWS Console.
+*   add double-clickable node that will open it in AWS Console.
+*   disable run button when already running.
+*   disable run button when socket connection is closed.
 *
 * View Actions:
 *   Add "view events" system action button. This view should also includes ran commands.

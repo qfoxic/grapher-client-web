@@ -140,12 +140,13 @@ class GStorage {
 }
 
 
-
 export enum DiagramMessageType {
-  LAYOUT = 'layout',
-  INITIAL_LAYOUT = 'initial_layout',
-  CLEAR = 'clear',
-
+  LAYOUT,
+  INITIAL_LAYOUT,
+  CLEAR,
+  FILTER_0_LINKS,
+  FILTER_MANY_LINKS,
+  FILTER_CLEAR
 }
 
 
@@ -185,6 +186,24 @@ export class GSettingsService {
   public clearDiagram(): void {
     this.diagramSubject.next(new DiagramMessage(
       DiagramMessageType.CLEAR
+    ));
+  }
+
+  public displayManyLinks(): void {
+    this.diagramSubject.next(new DiagramMessage(
+      DiagramMessageType.FILTER_0_LINKS
+    ));
+  }
+
+  public displayNoLinks(): void {
+    this.diagramSubject.next(new DiagramMessage(
+      DiagramMessageType.FILTER_MANY_LINKS
+    ));
+  }
+
+  public filterClear(): void {
+    this.diagramSubject.next(new DiagramMessage(
+      DiagramMessageType.FILTER_CLEAR
     ));
   }
 
