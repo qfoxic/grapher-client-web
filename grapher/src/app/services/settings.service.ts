@@ -151,8 +151,7 @@ class GStorage {
     this.storage = window[STORAGE_TYPE];
     this.prefix = PREFIX;
     this._diagrams = new Array<GDiagram>();
-
-    this._loadDiagrams();
+    this._load();
   }
 
   public get diagrams(): Array<GDiagram> | null {
@@ -160,19 +159,24 @@ class GStorage {
   }
 
   public addDiagram(diagram: GDiagram): void {
-    //debugger;
-    const data = JSON.stringify(diagram);
+    this._diagrams.push(diagram);
+    this._flush();
   }
 
-  private _loadDiagrams(): void {
-    const items = JSON.parse(this.storage.getItem(this._formatKey(DIAGRAMS_KEY)));
-    if (items) {
-      for (const item of items) {
-        if (GDiagram.isValid(item)) {
-          this._diagrams.push(new GDiagram(item));
-        }
+  private _load(): void {
+    const items = JSON.parse(this.storage.getItem(this._formatKey(DIAGRAMS_KEY))) || [];
+    for (const item of items) {
+      if (GDiagram.isValid(item)) {
+        this._diagrams.push(new GDiagram(item));
       }
     }
+  }
+
+  private _flush(): void {
+    this.storage.setItem(
+      this._formatKey(DIAGRAMS_KEY),
+      JSON.stringify(this._diagrams)
+    );
   }
 
   private _formatKey(key: string): string {

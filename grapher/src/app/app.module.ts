@@ -15,9 +15,6 @@ import { GBackendService } from './services/backend.service';
 /*
 * TODOs.
 *
-* CONFIG:
-* - if there are no diagrams- redirect to new config edit.
-*
 * BACKEND.
 * - add filtering on aws level to backend to extract only necessary data.
 * - instead of displaying node whole data - just provide a link to inspect.
