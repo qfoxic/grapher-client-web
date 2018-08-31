@@ -1,9 +1,17 @@
-<div class="grapher-container">
+<div class="grapher-container" *ngIf="settingsService.currentDiagram">
   <mat-progress-bar [mode]="progressMode"></mat-progress-bar>
   <ui-view name="content"></ui-view>
 
   <div class="top-button-panel">
-    <mat-form-field appearance="outline">
+    <mat-form-field uiSref="app.config.add" appearance="outline" class="button-item" matTooltip="Add new view">
+      <input matInput disabled>
+      <mat-icon matSuffix>create_new_folder</mat-icon>
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="button-item" matTooltip="Configure existing view">
+      <input matInput disabled>
+      <mat-icon matSuffix>edit</mat-icon>
+    </mat-form-field>
+    <mat-form-field appearance="outline" matTooltip="Please select view">
       <mat-select placeholder="Select View" [(value)]="settingsService.currentDiagramId">
         <mat-option *ngFor="let diagram of settingsService.diagrams; let i = index;"
                     [value]="i" uiSref="app.diagram" [uiParams]="{ diagramId: i }">
@@ -11,7 +19,7 @@
         </mat-option>
       </mat-select>
     </mat-form-field>
-    <mat-form-field appearance="outline" class="input-item">
+    <mat-form-field appearance="outline" class="input-item" matTooltip="Please enter driver query">
       <input #inputCommand matInput>
       <mat-icon (click)="execCmd(inputCommand.value)" matSuffix>play_arrow</mat-icon>
     </mat-form-field>
@@ -45,12 +53,12 @@
       </mat-button-toggle>
     </mat-button-toggle-group>
     <mat-button-toggle-group [vertical]="true" value="{{ settingsService.currentDiagram.defaultLayout }}">
-      <label class="group-label" *ngIf="settingsService.currentDiagram.layouts.size > 0">layout</label>
-      <mat-button-toggle *ngFor="let layout of settingsService.currentDiagram.layoutTypes;"
-                         matTooltip="{{settingsService.currentDiagram.layouts.get(layout).tip}}"
-                         value="{{ layout }}"
-                         (click)="settingsService.changeCurrentDiagramLayout(layout)">
-        <mat-icon>{{ settingsService.currentDiagram.layouts.get(layout).icon }}</mat-icon>
+      <label class="group-label" *ngIf="settingsService.currentDiagram.layouts.length > 0">layout</label>
+      <mat-button-toggle *ngFor="let layout of settingsService.currentDiagram.layouts;"
+                         matTooltip="{{ layout.tip }}"
+                         value="{{ layout.ltype }}"
+                         (click)="settingsService.changeDiagramLayout(layout.ltype)">
+        <mat-icon>{{ layout.icon }}</mat-icon>
       </mat-button-toggle>
     </mat-button-toggle-group>
   </mat-button-toggle-group>

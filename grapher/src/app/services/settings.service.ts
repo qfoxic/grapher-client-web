@@ -2,30 +2,6 @@ import { Injectable } from '@angular/core';
 import { Subject, Observable } from 'rxjs';
 
 
-const STORAGE_TYPE = 'localStorage';
-const PREFIX = 'grapher';
-const DIAGRAMS_KEY = 'diagrams';
-
-
-export class GShape {
-  readonly figure: string;
-  readonly fill: string;
-  readonly geometryString: string;
-
-  constructor({figure, fill, geometryString}) {
-    this.figure = figure;
-    this.fill = fill;
-    this.geometryString = geometryString;
-  }
-
-  static isValid(obj: any): obj is GShape {
-    return (
-      obj.fill !== undefined && (obj.figure !== undefined || obj.geometryString !== undefined)
-    );
-  }
-}
-
-
 export enum GLayoutTypes {
   CIRCULAR = 'circular',
   FORCE = 'force',
@@ -36,19 +12,82 @@ export enum GLayoutTypes {
 
 type GLayoutKeys = GLayoutTypes.CIRCULAR | GLayoutTypes.FORCE | GLayoutTypes.GRID | GLayoutTypes.DIGRAPH | GLayoutTypes.TREE;
 
+const STORAGE_TYPE = 'localStorage';
+const PREFIX = 'grapher';
+const DIAGRAMS_KEY = 'diagrams';
+
+const DEFAULT_DIAGRAM = {
+  'title': 'test_view',
+  'name': 'test_view',
+  'url': 'ws://127.0.0.1:9999',
+  'driver': 'aws',
+  'shapes': [],
+  'layouts': [
+    {
+      'ltype': GLayoutTypes.GRID,
+      'tip': 'Display data in a grid',
+      'icon': 'blur_linear'
+    },
+    {
+      'ltype': GLayoutTypes.DIGRAPH,
+      'tip': 'Display data in a digraph. Be carefull, rendering is very slow',
+      'icon': 'device_hub'
+    },
+    {
+      'ltype': GLayoutTypes.TREE,
+      'tip': 'Display data in a tree',
+      'icon': 'share'
+    },
+    {
+      'ltype': GLayoutTypes.CIRCULAR,
+      'tip': 'Display data in a circle',
+      'icon': 'blur_circular'
+    },
+    {
+      'ltype': GLayoutTypes.FORCE,
+      'tip': 'Display data in a tree with forces',
+      'icon': 'blur_on'
+    }
+  ]
+};
+
+
+export class GShape {
+  readonly name: string;
+  readonly figure: string;
+  readonly fill: string;
+  readonly geometryString: string;
+
+  constructor({name, figure, fill, geometryString}) {
+    this.name = name;
+    this.figure = figure;
+    this.fill = fill;
+    this.geometryString = geometryString;
+  }
+
+  static isValid(obj: any): obj is GShape {
+    return (
+      obj.name !== undefined &&
+      obj.fill !== undefined && (obj.figure !== undefined || obj.geometryString !== undefined)
+    );
+  }
+}
+
 
 export class GLayout {
+  readonly ltype: GLayoutTypes;
   readonly icon: string;
   readonly tip: string;
 
-  constructor({tip, icon}) {
+  constructor({ltype, tip, icon}) {
+    this.ltype = ltype;
     this.tip = tip;
     this.icon = icon;
   }
 
   static isValid(obj: any): obj is GLayout {
     return (
-      obj.tip !== undefined && obj.icon !== undefined
+      obj.ltype !== undefined && obj.tip !== undefined && obj.icon !== undefined
     );
   }
 }
@@ -67,11 +106,9 @@ export class GDiagram {
   // Driver type, like aws.
   readonly driver: string;
 
-  readonly shapes: Map<string, GShape>;
+  readonly shapes: Array<GShape> = new Array<GShape>();
 
-  readonly layouts: Map<GLayoutKeys, GLayout>;
-
-  readonly layoutTypes: Array<string>;
+  readonly layouts: Array<GLayout> = new Array<GLayout>();
 
   static isValid(obj: any): obj is GDiagram {
     return (
@@ -80,30 +117,27 @@ export class GDiagram {
     );
   }
 
-  constructor({title, name, url, driver, shapes, layouts}) {
+  constructor({title, name, url, driver,
+               shapes = new Array<GShape>(), layouts = new Array<GLayout>()}) {
     this.title = title;
     this.name = name;
     this.url = url;
     this.driver = driver;
-    this.shapes = new Map<string, GShape>();
-    this.layouts = new Map<GLayoutKeys, GLayout>();
-    this.layoutTypes = new Array<string>();
 
-    for (const shape in shapes) {
-      if (GShape.isValid(shapes[shape])) {
-        this.shapes.set(shape, new GShape(shapes[shape]));
+    for (const shape of shapes) {
+      if (GShape.isValid(shape)) {
+        this.shapes.push(new GShape(shape));
       }
     }
-    for (const layout in layouts) {
-      if (GLayout.isValid(layouts[layout])) {
-        this.layouts.set(<GLayoutKeys>layout, new GLayout(layouts[layout]));
+    for (const layout of layouts) {
+      if (GLayout.isValid(layout)) {
+        this.layouts.push(new GLayout(layout));
       }
     }
-    this.layouts.forEach((v, k) => { this.layoutTypes.push(k); }, this);
   }
 
   public get defaultLayout(): string {
-    return this.layoutTypes[0];
+    return this.layouts.length > 0 ? this.layouts[0].ltype : GLayoutTypes.GRID;
   }
 }
 
@@ -118,23 +152,30 @@ class GStorage {
     this.prefix = PREFIX;
     this._diagrams = new Array<GDiagram>();
 
-    this.loadDiagrams();
+    this._loadDiagrams();
   }
 
-  public get diagrams(): Array<GDiagram> {
-    return this._diagrams;
+  public get diagrams(): Array<GDiagram> | null {
+    return (this._diagrams.length > 0) ? this._diagrams : null;
   }
 
-  private loadDiagrams(): void {
-    const items = JSON.parse(this.storage.getItem(this.formatKey(DIAGRAMS_KEY)));
-    for (const item of items) {
-      if (GDiagram.isValid(item)) {
-        this._diagrams.push(new GDiagram(item));
+  public addDiagram(diagram: GDiagram): void {
+    //debugger;
+    const data = JSON.stringify(diagram);
+  }
+
+  private _loadDiagrams(): void {
+    const items = JSON.parse(this.storage.getItem(this._formatKey(DIAGRAMS_KEY)));
+    if (items) {
+      for (const item of items) {
+        if (GDiagram.isValid(item)) {
+          this._diagrams.push(new GDiagram(item));
+        }
       }
     }
   }
 
-  private formatKey(key: string): string {
+  private _formatKey(key: string): string {
     return `${this.prefix}${key}`;
   }
 }
@@ -172,11 +213,15 @@ export class GSettingsService {
     this.updateDiagram$ = this.diagramSubject.asObservable();
   }
 
-  public changeCurrentDiagram(diagramId: number): void {
+  public makeDefaultDiagram() {
+    this.storage.addDiagram(new GDiagram(DEFAULT_DIAGRAM));
+  }
+
+  public changeDiagram(diagramId: number): void {
     this.curDiagramId = diagramId;
   }
 
-  public changeCurrentDiagramLayout(layout: string): void {
+  public changeDiagramLayout(layout: string): void {
     this.diagramSubject.next(new DiagramMessage(
       DiagramMessageType.LAYOUT,
       layout
@@ -213,12 +258,12 @@ export class GSettingsService {
     ));
   }
 
-  public get diagrams(): Array<GDiagram> {
+  public get diagrams(): Array<GDiagram> | null {
     return this.storage.diagrams;
   }
 
-  public get currentDiagram(): GDiagram {
-    return this.storage.diagrams[this.curDiagramId];
+  public get currentDiagram(): GDiagram | null {
+    return (this.diagrams) ? this.storage.diagrams[this.curDiagramId] : null;
   }
 
   public get currentDiagramId(): number {
@@ -230,16 +275,17 @@ export class GSettingsService {
   }
 }
 
-
-const test_config = [
- {"title":"view1", "name": "test_view1", "url": "ws://127.0.0.1:9999", "driver": "aws",
- "shapes": {
-        "ec2": {"fill": "red", "figure": "Diamond"},
-        "sg": {"fill": "green", "figure": "Ellipse"}
- },
-   "layouts": {
-        "circular": {"tip": "Display data in a circle", "icon": "C"},
-        "force": {"tip": "Display in a tree with forces", "icon": "F"}
-  }
- },
+/*
+const test_config = [{
+  "title":"view1", "name": "test_view1", "url": "ws://127.0.0.1:9999",
+  "driver": "aws",
+  "shapes": [{"name": "ec2", "fill": "red", "figure": "Diamond"},
+             {"name": "sg", "fill": "green", "figure": "Ellipse"}],
+  "layouts": [
+    {"ltype": "grid", "tip": "Display data in a grid", "icon": "blur_linear"},
+    {"ltype": "digraph", "tip": "Display data in a digraph", "icon": "device_hub"},
+    {"ltype": "tree", "tip": "Display data in a tree", "icon": "share"},
+    {"ltype": "circular", "tip": "Display data in a circle", "icon": "blur_circular"},
+    {"ltype": "force", "tip": "Display data in a tree with forces", "icon": "blur_on"}}],
   {"title":"view2", "name": "test_view2", "url": "ws://127.0.0.1:9999", "driver": "aws"}]
+*/

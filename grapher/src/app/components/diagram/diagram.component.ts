@@ -35,8 +35,8 @@ export class DiagramComponent implements AfterContentInit, OnDestroy, OnInit {
     this.diag.initialContentAlignment = go.Spot.Center;
   }
 
-  private static propertyOf(data: Map<string, GShape>, name: string) {
-    return t => data.get(t)[name];
+  private static propertyOf(shapes: Array<GShape>, prop: string) {
+    return (t) => shapes.filter((v) => v.name === t)[0][prop];
   }
 
   private static makeLayout(layout: string | undefined | null): go.Layout {
@@ -59,13 +59,15 @@ export class DiagramComponent implements AfterContentInit, OnDestroy, OnInit {
     }
   }
 
-  private static makeNodeTemplate(diagram: go.Diagram, curD: GDiagram): void {
-    diagram.nodeTemplate = gomk(go.Node, 'Auto',
-      /*{
-        toolTip: gomk(go.HTMLInfo, {
-          show: this.showToolTip,
-        })
-      },*/
+  private makeNodeTemplate(diagram: go.Diagram, curD: GDiagram): void {
+    diagram.nodeTemplate = gomk(go.Node, 'Horizontal',
+      {
+        toolTip:
+          gomk(go.Adornment, 'Auto',
+            gomk(go.Shape, { fill: '#FFFFCC' }),
+            gomk(go.TextBlock, { margin: 4 }, new go.Binding('text', 'key'))
+          )
+      },
       gomk(go.Shape, { geometryStretch: go.GraphObject.Fill },
         new go.Binding('fill', 'category', DiagramComponent.propertyOf(curD.shapes, 'fill')),
         new go.Binding('figure', 'category', DiagramComponent.propertyOf(curD.shapes, 'figure')),
@@ -139,6 +141,10 @@ export class DiagramComponent implements AfterContentInit, OnDestroy, OnInit {
 
   ngOnInit() {
     const curD = this.settingsService.currentDiagram;
+    if (!curD) {
+      return;
+    }
+
     this.diag.layout = DiagramComponent.makeLayout(curD.defaultLayout);
 
     this.settingsService.updateDiagram$.subscribe((msg) => {
@@ -158,7 +164,7 @@ export class DiagramComponent implements AfterContentInit, OnDestroy, OnInit {
         }
       });
 
-    DiagramComponent.makeNodeTemplate(this.diag, curD);
+    this.makeNodeTemplate(this.diag, curD);
 
     this.backendService.init(curD.url, this.onDataReceived.bind(this));
     this.backendService.exec(`load ${curD.driver}`);

@@ -30,6 +30,14 @@
     display: flex;
     flex-direction: row;
 
+    .button-item {
+      max-width: 49px;
+
+      mat-icon {
+        transform: scale(1.4);
+      }
+    }
+
     .form-item {
       font-size: 13px;
     }
