@@ -17,7 +17,6 @@ const PREFIX = 'grapher';
 const DIAGRAMS_KEY = 'diagrams';
 
 const DEFAULT_DIAGRAM = {
-  'title': 'test_view',
   'name': 'test_view',
   'url': 'ws://127.0.0.1:9999',
   'driver': 'aws',
@@ -94,10 +93,6 @@ export class GLayout {
 
 
 export class GDiagram {
-  // Title will be displayed in a toolbar.
-  readonly title: string;
-
-  // Used as an id field;
   readonly name: string;
 
   // Websocket Connection url
@@ -112,14 +107,13 @@ export class GDiagram {
 
   static isValid(obj: any): obj is GDiagram {
     return (
-      obj.title !== undefined && obj.name !== undefined &&
+      obj.name !== undefined &&
       obj.url !== undefined && obj.driver !== undefined
     );
   }
 
-  constructor({title, name, url, driver,
+  constructor({name, url, driver,
                shapes = new Array<GShape>(), layouts = new Array<GLayout>()}) {
-    this.title = title;
     this.name = name;
     this.url = url;
     this.driver = driver;
@@ -138,6 +132,10 @@ export class GDiagram {
 
   public get defaultLayout(): string {
     return this.layouts.length > 0 ? this.layouts[0].ltype : GLayoutTypes.GRID;
+  }
+
+  public clone(): GDiagram {
+    return JSON.parse(JSON.stringify(this));
   }
 }
 
@@ -160,6 +158,11 @@ class GStorage {
 
   public addDiagram(diagram: GDiagram): void {
     this._diagrams.push(diagram);
+    this._flush();
+  }
+
+  public updateDiagram(index: number, diagram: GDiagram): void {
+    this._diagrams[index] = diagram;
     this._flush();
   }
 
@@ -204,7 +207,7 @@ export class DiagramMessage {
 @Injectable({
   providedIn: 'root'
 })
-export class GSettingsService {
+export class GDiagramService {
 
   private storage: GStorage;
   private curDiagramId: number;
@@ -217,8 +220,12 @@ export class GSettingsService {
     this.updateDiagram$ = this.diagramSubject.asObservable();
   }
 
-  public makeDefaultDiagram() {
+  public makeDefaultDiagram(): void {
     this.storage.addDiagram(new GDiagram(DEFAULT_DIAGRAM));
+  }
+
+  public updateDiagram(diagram: GDiagram, index: number): void {
+    this.storage.updateDiagram(index, diagram);
   }
 
   public changeDiagram(diagramId: number): void {
@@ -281,7 +288,7 @@ export class GSettingsService {
 
 /*
 const test_config = [{
-  "title":"view1", "name": "test_view1", "url": "ws://127.0.0.1:9999",
+  "name": "test_view1", "url": "ws://127.0.0.1:9999",
   "driver": "aws",
   "shapes": [{"name": "ec2", "fill": "red", "figure": "Diamond"},
              {"name": "sg", "fill": "green", "figure": "Ellipse"}],
@@ -291,5 +298,5 @@ const test_config = [{
     {"ltype": "tree", "tip": "Display data in a tree", "icon": "share"},
     {"ltype": "circular", "tip": "Display data in a circle", "icon": "blur_circular"},
     {"ltype": "force", "tip": "Display data in a tree with forces", "icon": "blur_on"}}],
-  {"title":"view2", "name": "test_view2", "url": "ws://127.0.0.1:9999", "driver": "aws"}]
+  {"name": "test_view2", "url": "ws://127.0.0.1:9999", "driver": "aws"}]
 */

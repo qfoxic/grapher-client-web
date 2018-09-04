@@ -1,6 +1,6 @@
 import { TestBed, inject } from '@angular/core/testing';
 
-import { StorageService } from './settings.service';
+import { StorageService } from './diagram.service';
 
 describe('StorageService', () => {
   beforeEach(() => {

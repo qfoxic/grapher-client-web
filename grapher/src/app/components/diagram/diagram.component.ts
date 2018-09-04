@@ -4,9 +4,9 @@ import {
 } from '@angular/core';
 import { GBackendService } from '../../services/backend.service';
 import {
-  GShape, GSettingsService, DiagramMessageType, GLayoutTypes,
+  GShape, GDiagramService, DiagramMessageType, GLayoutTypes,
   GDiagram
-} from '../../services/settings.service';
+} from '../../services/diagram.service';
 import * as go from 'gojs';
 
 
@@ -25,7 +25,7 @@ export class DiagramComponent implements AfterContentInit, OnDestroy, OnInit {
   private model: go.GraphLinksModel = new go.GraphLinksModel();
 
   @Input() private readonly backendService: GBackendService;
-  @Input() private readonly settingsService: GSettingsService;
+  @Input() private readonly diagramService: GDiagramService;
 
   @ViewChild('diagramDiv') private diagramRef: ElementRef;
 
@@ -140,14 +140,14 @@ export class DiagramComponent implements AfterContentInit, OnDestroy, OnInit {
   }
 
   ngOnInit() {
-    const curD = this.settingsService.currentDiagram;
+    const curD = this.diagramService.currentDiagram;
     if (!curD) {
       return;
     }
 
     this.diag.layout = DiagramComponent.makeLayout(curD.defaultLayout);
 
-    this.settingsService.updateDiagram$.subscribe((msg) => {
+    this.diagramService.updateDiagram$.subscribe((msg) => {
       switch (msg.changeType) {
         case DiagramMessageType.LAYOUT:
           this.onLayoutChanged(msg.data); break;

@@ -1,12 +1,15 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { MatSnackBar } from '@angular/material';
+import { MatSnackBar, MatDialog } from '@angular/material';
 import { Subscription } from 'rxjs';
-import { GSettingsService } from './services/settings.service';
 import { GBackendService, StatusMessageType } from './services/backend.service';
+import { GDiagramService } from './services/diagram.service';
+import { ConfigDialogComponent } from './components/config-dialog/config-dialog.component';
 
 
 const PROGRESS_DETERMINATE = 'determinate';
 const PROGRESS_INDETERMINATE = 'indeterminate';
+
+const CONFIG_DIALOG_WIDTH = '250px';
 
 
 @Component({
@@ -19,10 +22,10 @@ export class AppComponent implements OnDestroy, OnInit {
 
   private progressMode: 'determinate' | 'indeterminate';
 
-  @Input() private readonly settingsService: GSettingsService;
   @Input() private readonly backendService: GBackendService;
+  @Input() private readonly diagramService: GDiagramService;
 
-  constructor(public snackBar: MatSnackBar) {
+  constructor(public snackBar: MatSnackBar, public configDialog: MatDialog) {
     this.initProgress();
   }
 
@@ -40,6 +43,13 @@ export class AppComponent implements OnDestroy, OnInit {
 
   public showSnackBar(msg: string, duration: number, mtype: string) {
     this.snackBar.open(msg, '', { duration: duration, panelClass: mtype});
+  }
+
+  public showConfigDialog(): void {
+    this.configDialog.open(ConfigDialogComponent, {
+      width: CONFIG_DIALOG_WIDTH,
+      data: { diagram: this.diagramService.currentDiagram }
+    });
   }
 
   public execCmd(cmd: string) {

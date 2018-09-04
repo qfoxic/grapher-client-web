@@ -3,17 +3,20 @@ import { NgModule } from '@angular/core';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LayoutModule } from '@angular/cdk/layout';
-import { MatButtonModule, MatTooltipModule, MatButtonToggleModule,
+import { FormsModule } from '@angular/forms';
+import { MatButtonModule, MatTooltipModule, MatButtonToggleModule, MatDialogModule,
          MatIconModule, MatInputModule, MatSelectModule, MatSnackBarModule, MatProgressBarModule } from '@angular/material';
 import { UIRouterModule, UIView } from '@uirouter/angular';
 
 import { DiagramComponent } from './components/diagram/diagram.component';
-import { ConfigComponent } from './components/config/config.component';
-import { GSettingsService } from './services/settings.service';
+import { ConfigDialogComponent } from './components/config-dialog/config-dialog.component';
+import { GDiagramService } from './services/diagram.service';
 import { GBackendService } from './services/backend.service';
 
 /*
 * TODOs.
+* ! Add diagram deletion.
+*
 *
 * BACKEND.
 * - add filtering on aws level to backend to extract only necessary data.
@@ -42,8 +45,8 @@ const STATES = [
     component: AppComponent,
     abstract: true,
     resolve: [{
-      token: 'settingsService',
-      deps: [GSettingsService],
+      token: 'diagramService',
+      deps: [GDiagramService],
       resolveFn: (s) => s
     }, {
       token: 'backendService',
@@ -55,9 +58,9 @@ const STATES = [
     name: 'app.root',
     url: '/',
     redirectTo: (t) => {
-      return t.injector().getAsync('settingsService').then(settingsService => {
-        if (!settingsService.diagrams) {
-          settingsService.makeDefaultDiagram();
+      return t.injector().getAsync('diagramService').then(diagramService => {
+        if (!diagramService.diagrams) {
+          diagramService.makeDefaultDiagram();
         }
         return { state: 'app.diagram', params: { diagramId: 0 } };
       });
@@ -70,7 +73,7 @@ const STATES = [
       'content': { component: DiagramComponent }
     },
     onEnter: (t) => {
-      t.injector().get('settingsService').changeDiagram(t.params().diagramId);
+      t.injector().get('diagramService').changeDiagram(t.params().diagramId);
     }
   }
 ];
@@ -80,7 +83,7 @@ const STATES = [
   declarations: [
     AppComponent,
     DiagramComponent,
-    ConfigComponent
+    ConfigDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -89,6 +92,7 @@ const STATES = [
       states: STATES,
     }),
     LayoutModule,
+    FormsModule,
     MatButtonModule,
     MatIconModule,
     MatInputModule,
@@ -96,8 +100,10 @@ const STATES = [
     MatSnackBarModule,
     MatButtonToggleModule,
     MatTooltipModule,
-    MatProgressBarModule
+    MatProgressBarModule,
+    MatDialogModule
   ],
+  entryComponents: [ConfigDialogComponent],
   providers: [],
   bootstrap: [UIView]
 })

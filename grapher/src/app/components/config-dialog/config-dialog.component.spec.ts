@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DiagramComponent } from './config.component';
+import { DiagramComponent } from './config-dialog.component';
 
 describe('DiagramComponent', () => {
   let component: DiagramComponent;

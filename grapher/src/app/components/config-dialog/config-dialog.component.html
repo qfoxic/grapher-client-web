@@ -1,0 +1,13 @@
+<form #configForm="ngForm">
+  <p>
+    <mat-form-field appearance="standard">
+      <mat-label>Diagram Name</mat-label>
+      <input matInput [(ngModel)]="diagram.name" name="name" #name="ngModel">
+      <mat-hint>Diagram name that will be displayed in a select</mat-hint>
+    </mat-form-field>
+  </p>
+  <div mat-dialog-actions>
+    <button mat-button (click)="onCancel()">Cancel</button>
+    <button mat-button (click)="onSave()" cdkFocusInitial>Save</button>
+  </div>
+</form>
