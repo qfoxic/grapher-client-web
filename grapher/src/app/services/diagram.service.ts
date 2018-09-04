@@ -161,8 +161,8 @@ class GStorage {
     this._flush();
   }
 
-  public updateDiagram(index: number, diagram: GDiagram): void {
-    this._diagrams[index] = diagram;
+  public updateDiagram(dIndex: number, diagram: GDiagram): void {
+    this._diagrams[dIndex] = diagram;
     this._flush();
   }
 
@@ -224,8 +224,8 @@ export class GDiagramService {
     this.storage.addDiagram(new GDiagram(DEFAULT_DIAGRAM));
   }
 
-  public updateDiagram(diagram: GDiagram, index: number): void {
-    this.storage.updateDiagram(index, diagram);
+  public updateDiagram(dIndex: number, diagram: GDiagram): void {
+    this.storage.updateDiagram(dIndex, diagram);
   }
 
   public changeDiagram(diagramId: number): void {

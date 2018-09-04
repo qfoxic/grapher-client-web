@@ -46,9 +46,15 @@ export class AppComponent implements OnDestroy, OnInit {
   }
 
   public showConfigDialog(): void {
-    this.configDialog.open(ConfigDialogComponent, {
+    const dialogRef = this.configDialog.open(ConfigDialogComponent, {
       width: CONFIG_DIALOG_WIDTH,
-      data: { diagram: this.diagramService.currentDiagram }
+      data: { diagram: this.diagramService.currentDiagram,
+              index: this.diagramService.currentDiagramId }
+    });
+    dialogRef.afterClosed().subscribe(data => {
+      if (data.diagram) {
+        this.diagramService.updateDiagram(data.index, data.diagram);
+      }
     });
   }
 

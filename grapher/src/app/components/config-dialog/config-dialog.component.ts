@@ -1,6 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
-import { GDiagramService, GDiagram } from '../../services/diagram.service';
+import { GDiagram } from '../../services/diagram.service';
 
 
 @Component({
@@ -11,8 +11,7 @@ export class ConfigDialogComponent {
   diagram: GDiagram;
 
   constructor(public dialogRef: MatDialogRef<ConfigDialogComponent>,
-              @Inject(MAT_DIALOG_DATA) public data,
-              private diagramService: GDiagramService) {
+              @Inject(MAT_DIALOG_DATA) public data) {
     this.diagram = data.diagram.clone();
   }
 
@@ -21,7 +20,8 @@ export class ConfigDialogComponent {
   }
 
   onSave(): void {
-    this.diagramService.updateDiagram(this.diagram, this.diagramService.currentDiagramId);
-    this.dialogRef.close();
+    this.dialogRef.close({
+      diagram: this.diagram, index: this.data.index
+    });
   }
 }
