@@ -10,7 +10,15 @@ export enum GLayoutTypes {
   TREE  = 'tree'
 }
 
-type GLayoutKeys = GLayoutTypes.CIRCULAR | GLayoutTypes.FORCE | GLayoutTypes.GRID | GLayoutTypes.DIGRAPH | GLayoutTypes.TREE;
+
+export const LAYOUT_ICONS_MAP: Map<GLayoutTypes, string> = new Map<GLayoutTypes, string>([
+  [GLayoutTypes.CIRCULAR, 'blur_circular'],
+  [GLayoutTypes.GRID, 'blur_linear'],
+  [GLayoutTypes.DIGRAPH, 'device_hub'],
+  [GLayoutTypes.FORCE, 'blur_on'],
+  [GLayoutTypes.TREE, 'share']
+]);
+
 
 const STORAGE_TYPE = 'localStorage';
 const PREFIX = 'grapher';
@@ -24,28 +32,23 @@ const DEFAULT_DIAGRAM = {
   'layouts': [
     {
       'ltype': GLayoutTypes.GRID,
-      'tip': 'Display data in a grid',
-      'icon': 'blur_linear'
+      'tip': 'Display data in a grid'
     },
     {
       'ltype': GLayoutTypes.DIGRAPH,
-      'tip': 'Display data in a digraph. Be carefull, rendering is very slow',
-      'icon': 'device_hub'
+      'tip': 'Display data in a digraph. Be carefull, rendering is very slow'
     },
     {
       'ltype': GLayoutTypes.TREE,
-      'tip': 'Display data in a tree',
-      'icon': 'share'
+      'tip': 'Display data in a tree'
     },
     {
       'ltype': GLayoutTypes.CIRCULAR,
-      'tip': 'Display data in a circle',
-      'icon': 'blur_circular'
+      'tip': 'Display data in a circle'
     },
     {
       'ltype': GLayoutTypes.FORCE,
-      'tip': 'Display data in a tree with forces',
-      'icon': 'blur_on'
+      'tip': 'Display data in a tree with forces'
     }
   ]
 };
@@ -75,18 +78,16 @@ export class GShape {
 
 export class GLayout {
   readonly ltype: GLayoutTypes;
-  readonly icon: string;
   readonly tip: string;
 
-  constructor({ltype, tip, icon}) {
+  constructor({ltype, tip}) {
     this.ltype = ltype;
     this.tip = tip;
-    this.icon = icon;
   }
 
   static isValid(obj: any): obj is GLayout {
     return (
-      obj.ltype !== undefined && obj.tip !== undefined && obj.icon !== undefined
+      obj.ltype !== undefined && obj.tip !== undefined
     );
   }
 }
@@ -132,6 +133,10 @@ export class GDiagram {
 
   public get defaultLayout(): string {
     return this.layouts.length > 0 ? this.layouts[0].ltype : GLayoutTypes.GRID;
+  }
+
+  public layoutIcon(ltype: GLayoutTypes): string {
+    return LAYOUT_ICONS_MAP.get(ltype);
   }
 
   public clone(): GDiagram {
@@ -293,10 +298,10 @@ const test_config = [{
   "shapes": [{"name": "ec2", "fill": "red", "figure": "Diamond"},
              {"name": "sg", "fill": "green", "figure": "Ellipse"}],
   "layouts": [
-    {"ltype": "grid", "tip": "Display data in a grid", "icon": "blur_linear"},
-    {"ltype": "digraph", "tip": "Display data in a digraph", "icon": "device_hub"},
-    {"ltype": "tree", "tip": "Display data in a tree", "icon": "share"},
-    {"ltype": "circular", "tip": "Display data in a circle", "icon": "blur_circular"},
-    {"ltype": "force", "tip": "Display data in a tree with forces", "icon": "blur_on"}}],
+    {"ltype": "grid", "tip": "Display data in a grid"},
+    {"ltype": "digraph", "tip": "Display data in a digraph"},
+    {"ltype": "tree", "tip": "Display data in a tree"},
+    {"ltype": "circular", "tip": "Display data in a circle"},
+    {"ltype": "force", "tip": "Display data in a tree with forces"}],
   {"name": "test_view2", "url": "ws://127.0.0.1:9999", "driver": "aws"}]
 */

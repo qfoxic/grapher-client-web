@@ -9,8 +9,6 @@ import { ConfigDialogComponent } from './components/config-dialog/config-dialog.
 const PROGRESS_DETERMINATE = 'determinate';
 const PROGRESS_INDETERMINATE = 'indeterminate';
 
-const CONFIG_DIALOG_WIDTH = '250px';
-
 
 @Component({
   selector: 'app-root',
@@ -47,12 +45,11 @@ export class AppComponent implements OnDestroy, OnInit {
 
   public showConfigDialog(): void {
     const dialogRef = this.configDialog.open(ConfigDialogComponent, {
-      width: CONFIG_DIALOG_WIDTH,
       data: { diagram: this.diagramService.currentDiagram,
               index: this.diagramService.currentDiagramId }
     });
     dialogRef.afterClosed().subscribe(data => {
-      if (data.diagram) {
+      if (data && data.index >= 0) {
         this.diagramService.updateDiagram(data.index, data.diagram);
       }
     });

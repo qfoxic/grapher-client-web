@@ -3,9 +3,10 @@ import { NgModule } from '@angular/core';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LayoutModule } from '@angular/cdk/layout';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule, MatTooltipModule, MatButtonToggleModule, MatDialogModule,
-         MatIconModule, MatInputModule, MatSelectModule, MatSnackBarModule, MatProgressBarModule } from '@angular/material';
+         MatIconModule, MatInputModule, MatSelectModule, MatSnackBarModule,
+         MatProgressBarModule, MatTabsModule, MatDividerModule } from '@angular/material';
 import { UIRouterModule, UIView } from '@uirouter/angular';
 
 import { DiagramComponent } from './components/diagram/diagram.component';
@@ -101,7 +102,10 @@ const STATES = [
     MatButtonToggleModule,
     MatTooltipModule,
     MatProgressBarModule,
-    MatDialogModule
+    MatDialogModule,
+    MatTabsModule,
+    ReactiveFormsModule,
+    MatDividerModule
   ],
   entryComponents: [ConfigDialogComponent],
   providers: [],

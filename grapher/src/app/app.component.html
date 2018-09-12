@@ -58,7 +58,7 @@
                          matTooltip="{{ layout.tip }}"
                          value="{{ layout.ltype }}"
                          (click)="diagramService.changeDiagramLayout(layout.ltype)">
-        <mat-icon>{{ layout.icon }}</mat-icon>
+        <mat-icon>{{ diagramService.currentDiagram.layoutIcon(layout.ltype) }}</mat-icon>
       </mat-button-toggle>
     </mat-button-toggle-group>
   </mat-button-toggle-group>
