@@ -161,13 +161,19 @@ class GStorage {
     return (this._diagrams.length > 0) ? this._diagrams : null;
   }
 
-  public addDiagram(diagram: GDiagram): void {
-    this._diagrams.push(diagram);
+  public addDiagram(diagram: GDiagram): number {
+    const index: number = this._diagrams.push(diagram);
     this._flush();
+    return index - 1;
   }
 
   public updateDiagram(dIndex: number, diagram: GDiagram): void {
     this._diagrams[dIndex] = diagram;
+    this._flush();
+  }
+
+  public deleteDiagram(index: number): void {
+    this._diagrams.splice(index, 1);
     this._flush();
   }
 
@@ -225,12 +231,16 @@ export class GDiagramService {
     this.updateDiagram$ = this.diagramSubject.asObservable();
   }
 
-  public makeDefaultDiagram(): void {
-    this.storage.addDiagram(new GDiagram(DEFAULT_DIAGRAM));
+  public makeDefaultDiagram(): number {
+    return this.storage.addDiagram(new GDiagram(DEFAULT_DIAGRAM));
   }
 
   public updateDiagram(dIndex: number, diagram: GDiagram): void {
     this.storage.updateDiagram(dIndex, diagram);
+  }
+
+  public deleteDiagram(dIndex: number): void {
+    this.storage.deleteDiagram(dIndex);
   }
 
   public changeDiagram(diagramId: number): void {

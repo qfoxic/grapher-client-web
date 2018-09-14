@@ -68,13 +68,37 @@ const STATES = [
     }
   },
   {
+    name: 'app.newdiagram',
+    url: '/diagram/new',
+    redirectTo: (t) => {
+      return t.injector().getAsync('diagramService').then(diagramService => {
+        const diagramIndex = diagramService.makeDefaultDiagram();
+        return { state: 'app.diagram', params: { diagramId: diagramIndex } };
+      });
+    }
+  },
+  {
     name: 'app.diagram',
     url: '/diagram/{diagramId:int}',
     views: {
       'content': { component: DiagramComponent }
     },
     onEnter: (t) => {
-      t.injector().get('diagramService').changeDiagram(t.params().diagramId);
+      const diagramService = t.injector().get('diagramService');
+      if (!diagramService.diagrams) {
+        return t.router.stateService.target('app.newdiagram');
+      }
+      diagramService.changeDiagram(t.params().diagramId);
+    }
+  },
+  {
+    name: 'app.deldiagram',
+    url: '/diagram/delete/{diagramId:int}',
+    redirectTo: (t) => {
+      return t.injector().getAsync('diagramService').then(diagramService => {
+        diagramService.deleteDiagram(t.params().diagramId);
+        return { state: 'app.diagram', params: { diagramId: 0 } };
+      });
     }
   }
 ];

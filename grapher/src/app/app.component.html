@@ -4,12 +4,16 @@
 
   <div class="top-button-panel">
     <mat-form-field uiSref="app.config.add" appearance="outline" class="button-item" matTooltip="Add new view">
-      <input matInput disabled>
-      <mat-icon matSuffix>create_new_folder</mat-icon>
+      <input matInput disabled><!-- this is a hack. please remove it. -->
+      <mat-icon matSuffix uiSref="app.newdiagram">create_new_folder</mat-icon>
     </mat-form-field>
-    <mat-form-field appearance="outline" class="button-item" matTooltip="Configure existing view">
-      <input matInput disabled>
+    <mat-form-field appearance="outline" class="button-item" matTooltip="Configure current view">
+      <input matInput disabled><!-- this is a hack. please remove it. -->
       <mat-icon matSuffix (click)="showConfigDialog()">edit</mat-icon>
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="button-item" matTooltip="Delete current view">
+      <input matInput disabled><!-- this is a hack. please remove it. -->
+      <mat-icon matSuffix uiSref="app.deldiagram" [uiParams]="{ diagramId: diagramService.currentDiagramId }">clear</mat-icon>
     </mat-form-field>
     <mat-form-field appearance="outline" matTooltip="Please select view">
       <mat-select placeholder="Select View" [(value)]="diagramService.currentDiagramId">
